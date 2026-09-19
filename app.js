@@ -6,8 +6,15 @@ const todoList = document.querySelector('#todo-list');
 const emptyMessage = document.querySelector('#empty-message');
 const remainingCount = document.querySelector('#remaining-count');
 const clearCompletedButton = document.querySelector('#clear-completed');
+const filterButtons = document.querySelectorAll('.filter-button');
+const themeToggle = document.querySelector('#theme-toggle');
+const themeIcon = document.querySelector('#theme-icon');
+const themeLabel = document.querySelector('#theme-label');
 
 let todos = loadTodos();
+let currentFilter = 'all';
+const themePreference = localStorage.getItem('offline-todo-theme');
+const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)');
 
 // 從瀏覽器儲存空間載入待辦事項。
 function loadTodos() {
@@ -24,11 +31,38 @@ function saveTodos() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(todos));
 }
 
+// 依照手動選擇或作業系統偏好套用主題。
+function applyTheme(theme) {
+  const isDark = theme === 'dark';
+  document.body.classList.toggle('dark-theme', isDark);
+  themeIcon.textContent = isDark ? '☀️' : '🌙';
+  themeLabel.textContent = isDark ? '淺色模式' : '深色模式';
+  themeToggle.setAttribute('aria-label', isDark ? '切換至淺色模式' : '切換至深色模式');
+}
+
+function getPreferredTheme() {
+  return themePreference || (systemPrefersDark.matches ? 'dark' : 'light');
+}
+
+// 取得目前篩選條件下要顯示的待辦事項。
+function getVisibleTodos() {
+  if (currentFilter === 'active') {
+    return todos.filter((todo) => !todo.completed);
+  }
+
+  if (currentFilter === 'completed') {
+    return todos.filter((todo) => todo.completed);
+  }
+
+  return todos;
+}
+
 // 更新清單畫面與未完成數量。
 function renderTodos() {
   todoList.replaceChildren();
 
-  todos.forEach((todo) => {
+  const visibleTodos = getVisibleTodos();
+  visibleTodos.forEach((todo) => {
     const listItem = document.createElement('li');
     listItem.className = 'todo-item';
     if (todo.completed) {
@@ -67,7 +101,10 @@ function renderTodos() {
 
   const incompleteCount = todos.filter((todo) => !todo.completed).length;
   remainingCount.textContent = `未完成：${incompleteCount} 項`;
-  emptyMessage.hidden = todos.length > 0;
+  emptyMessage.textContent = visibleTodos.length === 0 && todos.length > 0
+    ? currentFilter === 'active' ? '目前沒有未完成的待辦事項。' : '目前沒有已完成的待辦事項。'
+    : '還沒有任何待辦事項，新增一個吧!';
+  emptyMessage.hidden = visibleTodos.length > 0;
   clearCompletedButton.hidden = !todos.some((todo) => todo.completed);
 }
 
@@ -97,4 +134,29 @@ clearCompletedButton.addEventListener('click', () => {
   renderTodos();
 });
 
+filterButtons.forEach((button) => {
+  button.addEventListener('click', () => {
+    currentFilter = button.dataset.filter;
+    filterButtons.forEach((filterButton) => {
+      const isActive = filterButton === button;
+      filterButton.classList.toggle('active', isActive);
+      filterButton.setAttribute('aria-pressed', String(isActive));
+    });
+    renderTodos();
+  });
+});
+
+themeToggle.addEventListener('click', () => {
+  const nextTheme = document.body.classList.contains('dark-theme') ? 'light' : 'dark';
+  localStorage.setItem('offline-todo-theme', nextTheme);
+  applyTheme(nextTheme);
+});
+
+systemPrefersDark.addEventListener('change', (event) => {
+  if (!localStorage.getItem('offline-todo-theme')) {
+    applyTheme(event.matches ? 'dark' : 'light');
+  }
+});
+
+applyTheme(getPreferredTheme());
 renderTodos();

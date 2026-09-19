@@ -9,8 +9,16 @@
 <body>
   <main class="todo-card">
     <header class="todo-header">
-      <p class="eyebrow">TODAY'S FOCUS</p>
-      <h1>待辦清單</h1>
+      <div class="title-row">
+        <div>
+          <p class="eyebrow">TODAY'S FOCUS</p>
+          <h1>待辦清單</h1>
+        </div>
+        <button class="theme-toggle" id="theme-toggle" type="button" aria-label="切換至深色模式">
+          <span id="theme-icon" aria-hidden="true">🌙</span>
+          <span id="theme-label">深色模式</span>
+        </button>
+      </div>
       <p class="subtitle">把想完成的事，一項一項放在心上。</p>
     </header>
 
@@ -20,6 +28,12 @@
       <button type="submit">新增</button>
     </form>
 
+    <div class="filter-buttons" role="group" aria-label="篩選待辦事項">
+      <button class="filter-button active" type="button" data-filter="all" aria-pressed="true">全部</button>
+      <button class="filter-button" type="button" data-filter="active" aria-pressed="false">未完成</button>
+      <button class="filter-button" type="button" data-filter="completed" aria-pressed="false">已完成</button>
+    </div>
+
     <section class="todo-list-section" aria-live="polite">
       <ul class="todo-list" id="todo-list"></ul>
       <p class="empty-message" id="empty-message">還沒有任何待辦事項，新增一個吧!</p>
@@ -27,7 +41,7 @@
 
     <footer class="todo-footer">
       <span id="remaining-count">未完成：0 項</span>
-      <button class="clear-completed" id="clear-completed" type="button">清除已完成</button>
+      <button class="clear-completed" id="clear-completed" type="button" hidden>清除已完成</button>
     </footer>
   </main>
 
