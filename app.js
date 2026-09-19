@@ -102,7 +102,9 @@ function renderTodos() {
   const incompleteCount = todos.filter((todo) => !todo.completed).length;
   remainingCount.textContent = `未完成：${incompleteCount} 項`;
   emptyMessage.textContent = visibleTodos.length === 0 && todos.length > 0
-    ? currentFilter === 'active' ? '目前沒有未完成的待辦事項。' : '目前沒有已完成的待辦事項。'
+    ? currentFilter === 'active'
+      ? '目前沒有未完成的待辦事項，其他項目仍在「全部」清單中。'
+      : '目前沒有已完成的待辦事項，其他項目仍在「全部」清單中。'
     : '還沒有任何待辦事項，新增一個吧!';
   emptyMessage.hidden = visibleTodos.length > 0;
   clearCompletedButton.hidden = !todos.some((todo) => todo.completed);
